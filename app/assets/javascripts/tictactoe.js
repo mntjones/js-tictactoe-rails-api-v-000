@@ -22,9 +22,11 @@ function setMessage(message) {
 
 function checkWinner() {
   var winner = false;
+  // get board
   var board = {};
   $('td').text((index, square) => board[index] = square);
 
+  // checking for winning board against winning_combos
   winning_combos.forEach( position => {
     if (board[position[0]] === board[position[1]] && board[position[1]] === board[position[2]] &&
       board[position[0]] !== "") {
@@ -58,33 +60,64 @@ function attachListeners() {
   });
 
   //  AJAX for button clicks
-  $('#save').on('click', () => saveGame())
-  $('#previous').on('click', () => showGames())
-  $('#clear').on('click', () => clearGame())
+  $('#save').on('click', function() { saveGame()} );
+  $('#previous').on('click', function() { showGames()} );
+  $('#clear').on('click', function() { clearGame()} );
 }
 
 function saveGame() {
   // get current board state in array
-  var board = {};
+  var board = []
   $('td').text((index, square) => board[index] = square);
 
-  // get game_id and save game in state?
-  $.patch //current game being played
+  var game_board = {state: board}
 
-  //completed game, auto saved
-  $.post(`/games/${game.id}`, function(data){
+  if (game_id === 0){
+    $.ajax({
+      url: '/games',
+      method: 'post',
+      data: game_board
+    }).done(function(resp){
+      game = resp["data"];
 
+      $('#games').append(`<button id="gameid-${game.id}">${game.id}</button><br>`);
+      // attach listener
+      $(`#gameid-${game.id}`).on('click', () => reloadGame(game.id))
+    });
+  } else {
+    $.ajax({
+      url: '/games/' + game_id,
+      method: "PATCH",
+      data: game_board
+    });
+  };
+}
+
+function reloadGame(gameId) {
+  $.get('/games/' + gameId, function(g){
+    game_id = g.data.id;
+    turn = 0;
+    $('td').each(function(i){
+      $(this).text(g.data.attributes.state[i]);
+      $(this).text() != "" ? turn++ : console.log("Empty");
+    });
   });
-
-  // set data to be able to post (looking for object {} )
-
 }
 
 function showGames() {
-
+  //  get request to render games
+  $.get('/games', function(games){
+    $('#games').empty();
+    games.data.forEach(function(game) {
+      $('#games').append(`<button id="gameid-${game.id}">${game.id}</button>`);
+      // attach listener
+      $(`#gameid-${game.id}`).on('click', () => reloadGame(game.id));
+    });
+  });
 }
 
 function clearGame() {
   turn = 0;
+  game_id = 0;
   $('td').empty();
 }
