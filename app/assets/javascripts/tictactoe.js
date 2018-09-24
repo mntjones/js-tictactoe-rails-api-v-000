@@ -72,7 +72,7 @@ function saveGame() {
 
   var game_board = {state: board}
 
-  if (game_id === 0){
+  if (this.id === 0){
     $.ajax({
       url: '/games',
       method: 'post',
