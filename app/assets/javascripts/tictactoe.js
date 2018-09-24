@@ -40,6 +40,7 @@ function checkWinner() {
 function doTurn(square) {
   updateState(square);
   turn ++;
+
   if (checkWinner()) {
     saveGame();
     clearGame();
@@ -72,14 +73,16 @@ function saveGame() {
 
   var game_board = {state: board}
 
-  if (this.id === 0){
+  if (game_id === 0){
+
     $.ajax({
       url: '/games',
       method: 'post',
       data: game_board
     }).done(function(resp){
       game = resp["data"];
-
+      // added line below to get to work!
+      game_id = game.id;
       $('#games').append(`<button id="gameid-${game.id}">${game.id}</button><br>`);
       // attach listener
       $(`#gameid-${game.id}`).on('click', () => reloadGame(game.id))
@@ -94,9 +97,11 @@ function saveGame() {
 }
 
 function reloadGame(gameId) {
+
   $.get('/games/' + gameId, function(g){
     game_id = g.data.id;
     turn = 0;
+    $('#games').empty();
     $('td').each(function(i){
       $(this).text(g.data.attributes.state[i]);
       $(this).text() != "" ? turn++ : console.log("Empty");
@@ -107,6 +112,7 @@ function reloadGame(gameId) {
 function showGames() {
   //  get request to render games
   $.get('/games', function(games){
+    // added line below to get to work!
     $('#games').empty();
     games.data.forEach(function(game) {
       $('#games').append(`<button id="gameid-${game.id}">${game.id}</button>`);
