@@ -3,9 +3,14 @@ const winning_combos = [[0,1,2], [3,4,5], [6,7,8], [0,3,6], [1,4,7], [2,5,8], [0
 var turn = 0;
 var game_id = 0;
 
+<<<<<<< HEAD
 $(document).ready(function() {
   attachListeners();
 });
+=======
+$(document).ready() {
+  attachListeners();
+}
 
 function player() {
   return (turn % 2 === 0) ? "X" : "O";
@@ -72,6 +77,7 @@ function saveGame() {
   $('td').text((index, square) => board[index] = square);
 
   var game_board = {state: board}
+<<<<<<< HEAD
 
   if (game_id === 0){
 
@@ -107,6 +113,24 @@ function reloadGame(gameId) {
       $(this).text() != "" ? turn++ : console.log("Empty");
     });
   });
+=======
+  // update if existing game
+  if(game_id){
+    $.ajax({
+      type: 'PATCH',
+      url: `/games/${game_id}`,
+      data: game_board
+    })
+  } else {
+    // save current game (new route)
+    $.post('/games', game_board, function(game){
+      game_id = game.data.id;
+      $('#games').append(`<button id="gameid-${game_id}">${game_id}</button><br>`)
+      // attach listener
+      $(`#gameid-${game_id}`).on('click', () => reloadGame(game_id))
+    })
+  }
+>>>>>>> a067c72d48fd5836f6afc4d52348b897bcd60a21
 }
 
 function showGames() {
